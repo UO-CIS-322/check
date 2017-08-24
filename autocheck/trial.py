@@ -38,7 +38,9 @@ def trial(context):
     must always add explanatory messages. 
     """
     log.debug("Entering trial")
+    log.debug("Context: {}".format(context))
     settings = read_config(context["credentials"])
+    log.debug("Configuration settings: {}".format(settings))
     repo_remote = settings["repo"]
     clone_path = tmp_path("clone")
     context["repo_remote"] = repo_remote
@@ -50,6 +52,7 @@ def trial(context):
           and install(context)   )
 
     log.debug("Returned from clone and install")
+    log.debug("Log messages: {}".format(context["messages"]))
     
     return ok
 
@@ -83,7 +86,9 @@ def clone_repo( context ):
     except subprocess.CalledProcessError as exception: 
         log.error("Installation failed: {}".format(exception))
         log.error("Output: {}".format(exception.output))
+        context["messages"] += exception.output
         return False
+
 
 def install(context):
     log.debug("Entering install")

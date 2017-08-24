@@ -25,8 +25,9 @@ run:	env
 
 service:	env
 	echo "Launching green unicorn in background"
-	($(INVENV) gunicorn --bind="0.0.0.0:8000" \
-                   autocheck/flask_grader.py:app )&
+	($(INVENV)  cd autocheck ; \
+                   gunicorn --bind="0.0.0.0:8000" \
+                   flask_grader:app )&
 
 ##
 ## Run test suite. 

@@ -25,7 +25,8 @@ import trial  # The part of auto-grading that does not depend on flask
 # Globals
 ###
 app = flask.Flask(__name__)
-CONFIG = config.configuration()
+proxied = __name__ != "__main__"
+CONFIG = config.configuration(proxied=proxied)
 app.config.from_object(CONFIG)
 app.logger.debug("Configuration: {}".format(app.config))
 
@@ -77,10 +78,9 @@ def upload_project():
     app.logger.debug("Preparing call-out to trial module")
     ok = trial.trial(context)
     app.logger.debug("Returned from trial module")
+    flask.g.messages = context["messages"]
     if not ok:
-        flask.g.messages = context["messages"]
         return flask.render_template("failed.html")
-        # return flask.redirect(url_for("failed"))
     return flask.render_template("success.html")
 
 # @app.route('/failed')

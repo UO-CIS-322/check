@@ -46,6 +46,18 @@ def command_line_args():
     log.debug("<- Command line args: {}".format(cli_args))
     return cli_args
 
+def fake_cli_args():
+    """When we're running under a proxy like gunicorn, the command 
+    line belongs to the proxy and not to us, so we ignore it.  We
+    create a fake, empty cli_args instead. 
+    """
+    log.debug("-> Fake cli args")
+    parser = argparse.ArgumentParser(description="CIS 322 Auto-Checker")
+    cli_args = parser.parse_args([])
+    log.debug("<- Command line args: {}".format(cli_args))
+    return cli_args
+
+
 def config_file_args(config_file_path, project=None):
     """Returns dict of values from the configuration file. 
     If the project kwarg is provided, we will take configuration 
@@ -75,14 +87,22 @@ def imply_types(ns: dict):
             ns[var] = int(val)
             
 
-def configuration():
+def configuration(proxied=False):
     """
     Returns namespace (that is, object) of configuration 
     values, giving precedence to command line arguments over 
     configuration file values. 
+
+    When proxied = True, the command line is not read; all 
+    configuration must come from the config.ini file.  A proxy 
+    like gunicorn may not use some some configuration values, 
+    such as the PORT. 
     """
     log.debug("-> configuration")
-    cli = command_line_args()
+    if proxied:
+        cli = fake_cli_args()
+    else: 
+        cli = command_line_args()
     cli_vars = vars(cli)  # Access the namespace as a dict
     log.debug("CLI variables: {}".format(cli_vars))
     config_file_path = cli_vars.get("config") or "config.ini"
