@@ -13,9 +13,15 @@ env:
 	python3 -m venv  env
 	($(INVENV) pip install -r requirements.txt )
 
-# 'make run' runs Flask's built-in test server, 
-#  with debugging turned on unless it is unset in CONFIG.py
+# 'make run' runs Flask's built-in test server, reachable
+#  only on localhost,  with debugging turned on unless it
+# is unset in CONFIG.py.
+# 'make service' runs under the Gunicorn server. 
 # 
+
+run:	env
+	echo "Launching built-in server for localhost only"
+	($(INVENV) python3 autocheck/flask_grader.py -C autocheck/config.ini)
 
 service:	env
 	echo "Launching green unicorn in background"
