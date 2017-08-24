@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 
 import json
 import logging
-import configparser
+import config     # Reads from config.ini and command line
 
 import arrow      # For timestamp in file name creation
 import subprocess # Installation process 
@@ -25,14 +25,14 @@ import trial  # The part of auto-grading that does not depend on flask
 # Globals
 ###
 app = flask.Flask(__name__)
+CONFIG = config.configuration()
+app.config.from_object(CONFIG)
+app.logger.debug("Configuration: {}".format(app.config))
 
-#FIXME:  Use configparser with .ini file for the
-#  following values. 
-UPLOAD_FOLDER = "/tmp"
-ALLOWED_EXTENSIONS = set(['ini', 'cfg'])
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 64 * 1024  # 64K is plenty for a config file
-app.logger.setLevel(logging.DEBUG)
+# config = configparser.ConfigParser()
+app.logger.debug("Uploads to '{}'".format(app.config["UPLOAD_FOLDER"]))
+MAX_CONTENT_LENGTH = 64 * 1024  # 64K is plenty for a config file
+
 
 ###
 # Pages
@@ -135,10 +135,10 @@ def upload_credentials( project_context ):
 def allowed_file(filename):
     """May the user upload files named liked this?"""
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1].lower() == "ini"
 
 
-def tmp_path(name,dir=UPLOAD_FOLDER):
+def tmp_path(name,dir=app.config["UPLOAD_FOLDER"]):
     """Return a unique local path in /tmp based on name."""
     # While Python's UUID module could do this,
     # we don't need universal uniqueness, so a shorter
@@ -195,8 +195,6 @@ def format_arrow_date( date ):
 # stand-alone. 
 #
 app.secret_key = "fixme please"
-app.debug=logging.DEBUG
-app.logger.setLevel(logging.DEBUG)
 if __name__ == "__main__":
     print("Opening for global access on port {}".format(5000))
     app.run(port=5000, host="0.0.0.0")
