@@ -19,13 +19,13 @@
 </head>
 
 <body>
-<h1>Build tester</h1>
-
-<p>Robot want to build project.  Robot want to test project.
-You make robot happy. 
-<p>
-
-{% with messages = get_flashed_messages() %}
+<div class="container">
+<div class="row">
+  <div class="col-md-12">
+    <h1>CIS 322 Build Check</h1>
+    <p>Let the robot try building your project.  You did follow the
+    directions precisely, right?</p>
+  {% with messages = get_flashed_messages() %}
   {% if messages %}
     <ul class=flashes>
     {% for message in messages %}
@@ -34,27 +34,30 @@ You make robot happy.
     </ul>
   {% endif %}
 {% endwith %}
+  </div>
+</div>
+
 
 <!-- Design on bootstrap grid -->
- <form role="form" enctype="multipart/form-data"
+<form role="form" enctype="multipart/form-data"
     action="_upload" method="POST">
-  <div class="row">
+<div class="row">
   <div class="col-md-4">
     <select name="project">
     <option value="proj0">Project 0: Hello world</option>
   </select>
   </div>
-  </div>
-<div class="row">
-  <div class="col-md-8">
+  <div class="col-md-4">
     <label for="cfgfile">Configuration (.ini) file:</label>
     <input type="file" name="cfgfile" id="cfgfile"></input>
   </div> <!-- col -->
-  </div> <!-- row -->
+</div> <!-- row -->
+
 <div class="row">
   <div class="col-md-4">
   <input type="submit"></input>
 </div></div>
 </form>
 
+</div> <!-- container -->
 </body> </html>
