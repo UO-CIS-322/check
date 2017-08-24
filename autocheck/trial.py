@@ -49,7 +49,8 @@ def trial(context):
     log.debug("Preparing to clone and install")
 
     ok = ( clone_repo( context)
-          and install(context)   )
+          and install(context)
+          and testit(context))
 
     log.debug("Returned from clone and install")
     log.debug("Log messages: {}".format(context["messages"]))
@@ -110,6 +111,31 @@ def install(context):
         context["messages"] += makelog
         context["messages"] += exception.output
         return False
+
+def testit(context):
+    log.debug("Entering testit")
+    clone = context["clone_path"]    
+    project = context["project"]
+    this_dir = os.path.dirname( __file__ )
+    test_path = os.path.join(this_dir,  "..", "tests", project)
+    test_script = os.path.join(test_path, "test.sh")
+    log.debug("Looking for test script at {}".format(test_path))
+    try:
+        testlog = subprocess.check_output(
+            [test_script, clone],
+            cwd=test_path, 
+            stderr=subprocess.STDOUT,
+            encoding='utf-8' )
+        context["messages"] += testlog
+        log.debug("Testing output: {}".format(testlog))
+        return True
+    except subprocess.CalledProcessError as exception: 
+        log.error("Testing failed: {}".format(exception))
+        log.error("Output: {}".format(exception.output))
+        context["messages"] += testlog
+        context["messages"] += exception.output
+        return False
+
        
 def tmp_path(name,dir="/tmp"):
     """Return a unique local path in /tmp based on name."""

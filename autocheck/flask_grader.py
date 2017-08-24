@@ -66,6 +66,9 @@ def upload_project():
                 "messages":  ""
                 }
 
+    context["project"] = flask.request.form["project"]
+    app.logger.debug("Project is {}".format(context["project"]))
+
     # The credentials upload step is within the flask 
     # context, and 
     ok = ( check_file_upload( request ) 

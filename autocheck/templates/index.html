@@ -21,8 +21,8 @@
 <body>
 <h1>Build tester</h1>
 
-<p>Robot wants to build project.  Robot happy if project builds ok.
-Robot not happy if project breaks.
+<p>Robot want to build project.  Robot want to test project.
+You make robot happy. 
 <p>
 
 {% with messages = get_flashed_messages() %}
@@ -37,7 +37,14 @@ Robot not happy if project breaks.
 
 <!-- Design on bootstrap grid -->
  <form role="form" enctype="multipart/form-data"
-   action="_upload" method="POST">
+    action="_upload" method="POST">
+  <div class="row">
+  <div class="col-md-4">
+    <select name="project">
+    <option value="proj0">Project 0: Hello world</option>
+  </select>
+  </div>
+  </div>
 <div class="row">
   <div class="col-md-8">
     <label for="cfgfile">Configuration (.ini) file:</label>
