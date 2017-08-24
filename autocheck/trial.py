@@ -75,13 +75,15 @@ def clone_repo( context ):
         installation = subprocess.check_output(
             ["git", "clone", repo_remote, clone_path],
             stderr=subprocess.STDOUT,
-            encoding='utf-8')
+            # encoding='utf-8')        # Not supported in Python 3.4
+            universal_newlines=True)   # But this is? 
         log.info("Installation messages: {}".format(installation))
         context["messages"] += installation
         listing = subprocess.check_output(
             ["ls", "-p", "-C", "-B",  clone_path],
             stderr=subprocess.STDOUT,
-            encoding='utf-8' )
+            # encoding='utf-8' )       # Not supported in Python 3.4
+            universal_newlines=True)   # but this is? 
         context["messages"] += listing
         return True
     except subprocess.CalledProcessError as exception: 
@@ -101,7 +103,8 @@ def install(context):
             ["make", "install"],
             cwd=clone, 
             stderr=subprocess.STDOUT,
-            encoding='utf-8' )
+            # encoding='utf-8' )       # Not supported in Python 3.4
+            universal_newlines=True)   # but this is? 
          context["messages"] += makelog
          log.debug("Make output: {}".format(makelog))
          return True
@@ -125,7 +128,8 @@ def testit(context):
             [test_script, clone],
             cwd=test_path, 
             stderr=subprocess.STDOUT,
-            encoding='utf-8' )
+            # encoding='utf-8' )       # Not supported in Python 3.4
+            universal_newlines=True)   # but this is? 
         context["messages"] += testlog
         log.debug("Testing output: {}".format(testlog))
         return True
