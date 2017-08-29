@@ -51,9 +51,10 @@ def trial(context):
 
     ok = (clone_repo(context)
           and install(context)
+          and stylecheck(context)
           and testit(context))
 
-    log.debug("Returned from clone and install")
+    log.debug("Returned from trial")
     log.debug("Log messages: {}".format(context["messages"]))
 
     return ok
@@ -74,6 +75,7 @@ def clone_repo(context):
     log.debug("Entering clone_repo")
     clone_path = context["clone_path"]
     repo_remote = context["repo_remote"]
+    context["messages"] += "\n*** Cloning ***\n"
     try:
         installation = subprocess.check_output(
             ["git", "clone", repo_remote, clone_path],
@@ -100,7 +102,7 @@ def install(context):
     log.debug("Entering install")
     clone = context["clone_path"]
     log.debug("Working in directory {}".format(clone))
-    makelog = ""
+    makelog = "\n*** Installing ***\n"
     try:
         makelog = subprocess.check_output(
             ["make", "install"],
@@ -127,6 +129,7 @@ def testit(context):
     test_path = os.path.join(this_dir,  "..", "tests", project)
     test_script = os.path.join(test_path, "test.sh")
     log.debug("Looking for test script at {}".format(test_path))
+    context["messages"] += "\n*** Testing ***\n"
     try:
         testlog = subprocess.check_output(
             [test_script, clone],
@@ -143,6 +146,34 @@ def testit(context):
         context["messages"] += testlog
         context["messages"] += exception.output
         return False
+
+
+def stylecheck(context):
+    log.debug("Entering stylecheck")
+    clone = context["clone_path"]
+    project = context["project"]
+    this_dir = os.path.dirname(__file__)
+    test_path = os.path.join(this_dir,  "..", "tests", project)
+    log.debug("Attempting pycodestyle script at {}".format(test_path))
+    testlog = "\n*** PEP 8 standards check ***\n"
+    try:
+        testlog = subprocess.check_output(
+            ["pycodestyle", clone],
+            cwd=test_path,
+            stderr=subprocess.STDOUT,
+            # encoding='utf-8' )       # Not supported in Python 3.4
+            universal_newlines=True)   # but this is?
+        context["messages"] += testlog
+        log.debug("Style check output: {}".format(testlog))
+        return True
+    except subprocess.CalledProcessError as exception:
+        log.error("Checking failed: {}".format(exception))
+        log.error("Output: {}".format(exception.output))
+        context["messages"] += testlog
+        context["messages"] += exception.output
+        return False
+    
+
 
 
 def tmp_path(name, dir="/tmp"):
