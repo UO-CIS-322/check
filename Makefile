@@ -13,6 +13,13 @@ env:
 	python3 -m venv  env
 	($(INVENV) pip install -r requirements.txt )
 
+##
+## Style checks  (for this project, not for projects being checked)
+##
+check:	env
+	($(INVENV)  cd autocheck ; \
+	 pycodestyle *.py )
+
 # 'make run' runs Flask's built-in test server, reachable
 #  only on localhost,  with debugging turned on unless it
 # is unset in CONFIG.py.
