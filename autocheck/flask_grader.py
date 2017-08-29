@@ -1,5 +1,5 @@
 """
-Flask app gets project description 
+Flask app gets project description
 including github URL
 
 """
@@ -14,10 +14,10 @@ from werkzeug.utils import secure_filename
 
 import json
 import logging
-import config     # Reads from config.ini and command line
+import config       # Reads from config.ini and command line
 
-import arrow      # For timestamp in file name creation
-import subprocess # Installation process 
+import arrow        # For timestamp in file name creation
+import subprocess   # Installation process
 
 import trial  # The part of auto-grading that does not depend on flask
 
@@ -42,8 +42,9 @@ MAX_CONTENT_LENGTH = 64 * 1024  # 64K is plenty for a config file
 @app.route("/")
 @app.route("/index")
 def index():
-  app.logger.debug("Main page entry")
-  return flask.render_template("index.html")
+    app.logger.debug("Main page entry")
+    return flask.render_template("index.html")
+
 
 @app.route('/_upload', methods=['POST'])
 def upload_project():
@@ -53,7 +54,7 @@ def upload_project():
     function which is executed in the request context and can call
     flask.flash to report progress or problems.  Each step may return a
     truthy value to enable the next step, or a falsy value to indicate
-    that the submit/build/run process has failed.  We pass along a 
+    that the submit/build/run process has failed.  We pass along a
     dictionary in which we stash useful information along the way.
     """
     app.logger.debug("Entering _upload")
@@ -61,18 +62,18 @@ def upload_project():
 
     # The remainder of the processing should be in trial.py.
     # We give trial the path to a credentials file and a
-    # context into which it can place messages. 
-    context = { "credentials": credentials_path,
-                "messages":  ""
-                }
+    # context into which it can place messages.
+    context = {"credentials": credentials_path,
+               "messages":  ""
+               }
 
     context["project"] = flask.request.form["project"]
     app.logger.debug("Project is {}".format(context["project"]))
 
-    # The credentials upload step is within the flask 
-    # context, and 
-    ok = ( check_file_upload( request ) 
-           and upload_credentials( context ))
+    # The credentials upload step is within the flask
+    # context, and
+    ok = (check_file_upload(request)
+          and upload_credentials(context))
     app.logger.debug("Uploaded credentials to {}".format(credentials_path))
     if not ok:
         flask.flash("Credentials upload failed")
@@ -95,11 +96,11 @@ def upload_project():
 #    return flask.render_template("success.html")
 
 
-def check_file_upload(request): 
-    """Attempt to upload a credentials file.  
-    If successful, returns True and leaves file 
+def check_file_upload(request):
+    """Attempt to upload a credentials file.
+    If successful, returns True and leaves file
     at grading_path/credentials.ini.
-    If disallowed or unsuccessful, returns False. 
+    If disallowed or unsuccessful, returns False.
     """
     if 'cfgfile' not in request.files:
         flash('No file part')
@@ -115,11 +116,12 @@ def check_file_upload(request):
         return False
     return True
 
-def upload_credentials( project_context ):
+
+def upload_credentials(project_context):
     """Attempt to upload the credentials file"""
     file = request.files['cfgfile']
     credentials_path = project_context["credentials"]
-    try: 
+    try:
         file.save(credentials_path)
         flash('file uploaded to {}'.format(credentials_path))
         return True
@@ -127,8 +129,8 @@ def upload_credentials( project_context ):
         flask.flash("Failed to upload credentials file; unknown problem")
         flask.flash("Encountered this exception: {}".format(e))
         return False
-        
- 
+
+
 ##################
 #
 # Functions used by routes
@@ -141,14 +143,14 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() == "ini"
 
 
-def tmp_path(name,dir=app.config["UPLOAD_FOLDER"]):
+def tmp_path(name, dir=app.config["UPLOAD_FOLDER"]):
     """Return a unique local path in /tmp based on name."""
     # While Python's UUID module could do this,
     # we don't need universal uniqueness, so a shorter
     # name based on timestamp will do.  Leading comma
-    # encourages daily cleanup. 
+    # encourages daily cleanup.
     ts = arrow.now().timestamp
-    return "{}/,{}.{}".format(dir,name[0:8],ts)
+    return "{}/,{}.{}".format(dir, name[0:8], ts)
 
 
 ##################
@@ -161,21 +163,22 @@ def tmp_path(name,dir=app.config["UPLOAD_FOLDER"]):
 @app.errorhandler(404)
 def page_not_found(error):
     app.logger.debug("Page not found")
-    flask.session['linkback'] =  flask.url_for("index")
+    flask.session['linkback'] = flask.url_for("index")
     return flask.render_template('404.html'), 404
+
 
 @app.errorhandler(403)
 def page_not_found(error):
     app.logger.debug("403: Forbidden")
-    flask.session['linkback'] =  flask.url_for("index")
+    flask.session['linkback'] = flask.url_for("index")
     return flask.render_template('403.html'), 403
+
 
 @app.errorhandler(500)
 def page_not_found(error):
     app.logger.debug("500: Internal error")
-    flask.session['linkback'] =  flask.url_for("index")
+    flask.session['linkback'] = flask.url_for("index")
     return flask.render_template('500.html'), 500
-
 
 
 #################
@@ -184,21 +187,21 @@ def page_not_found(error):
 #
 #################
 
-@app.template_filter( 'fmtdate' )
-def format_arrow_date( date ):
-    try: 
-        normal = arrow.get( date )
+@app.template_filter('fmtdate')
+def format_arrow_date(date):
+    try:
+        normal = arrow.get(date)
         return normal.format("ddd MM/DD/YYYY")
-    except:
-        return "(bad date)"
+    except ParserError:
+        return "(bad date {})".format(date)
+
 
 #############
-#    
-# Set up to run in gunicorn or 
-# stand-alone. 
+#
+# Set up to run in gunicorn or
+# stand-alone.
 #
 app.secret_key = "fixme please"
 if __name__ == "__main__":
     print("Opening for global access on port {}".format(5000))
     app.run(port=5000, host="0.0.0.0")
-
