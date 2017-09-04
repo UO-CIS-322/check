@@ -4,12 +4,10 @@
 #
 SUT=$1
 capture="/tmp/,$$"
-# echo "Capturing to ${capture}"
 echo "Testing project in $1"
 cd ${SUT}
 # source env/bin/activate  ## Starting with project 2
-ls
-# echo "python3 hello.py  &> ${capture}"
+cd hello
 python3 hello.py  &> ${capture} 
 expect="Hello world"
 got=`cat ${capture}`
