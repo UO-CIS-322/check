@@ -67,8 +67,15 @@ def upload_project():
                "messages":  ""
                }
 
-    context["project"] = flask.request.form["project"]
-    app.logger.debug("Project is {}".format(context["project"]))
+    proj_app = flask.request.form["project"]
+    app.logger.debug("Project+App is {}".format(proj_app))
+    proj, projname = proj_app.split(":")
+    app.logger.debug("Project: {}".format(proj))
+    app.logger.debug("App: {}".format(projname))
+
+    context["project"] = proj  # Example proj0, proj1, etc
+    context["app"] = projname  # Example hello, pageserver, etc
+
 
     # The credentials upload step is within the flask
     # context, and
@@ -87,13 +94,12 @@ def upload_project():
         return flask.render_template("failed.html")
     return flask.render_template("success.html")
 
-# @app.route('/failed')
-# def failed():
-#     return flask.render_template("failed.html")
 
-# @app.route('/success')
-# def success():
-#    return flask.render_template("success.html")
+##################
+#
+# Functions used by routes
+#
+##################
 
 
 def check_file_upload(request):
@@ -130,12 +136,6 @@ def upload_credentials(project_context):
         flask.flash("Encountered this exception: {}".format(e))
         return False
 
-
-##################
-#
-# Functions used by routes
-#
-##################
 
 def allowed_file(filename):
     """May the user upload files named liked this?"""

@@ -50,9 +50,13 @@ def trial(context):
     log.debug("Preparing to clone and install")
 
     ok = (clone_repo(context)
-          and install(context)
-          and stylecheck(context)
-          and testit(context))
+              and install(context))
+
+    # The following steps are contingent only on passing
+    # installation, i.e., we run tests even if style check fails
+    if ok:
+          ok = stylecheck(context)
+          ok = testit(context) and ok 
 
     log.debug("Returned from trial")
     log.debug("Log messages: {}".format(context["messages"]))
@@ -99,17 +103,32 @@ def clone_repo(context):
 
 
 def install(context):
+    """Installation includes copying the credentials file
+    and calling the Makefile installation recipe.
+    """
     log.debug("Entering install")
     clone = context["clone_path"]
     log.debug("Working in directory {}".format(clone))
     makelog = "\n*** Installing ***\n"
     try:
-        makelog = subprocess.check_output(
+        cred_file_path = os.path.join(context["app"], "credentials.ini")
+        makelog += subprocess.check_output(
+            ["cp", context["credentials"], cred_file_path],
+            cwd=clone,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True)
+        makelog += "** Contents of application sub-folder **\n"
+        makelog += subprocess.check_output(
+            ["ls", "-p", "-C", "-B",  context["app"]], 
+            cwd=clone,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True)
+        makelog += subprocess.check_output(
             ["make", "install"],
             cwd=clone,
             stderr=subprocess.STDOUT,
             # encoding='utf-8' )       # Not supported in Python 3.4
-            universal_newlines=True)   # but this is?
+            universal_newlines=True)   # but this is
         context["messages"] += makelog
         log.debug("Make output: {}".format(makelog))
         return True
@@ -117,7 +136,9 @@ def install(context):
         log.error("Installation failed: {}".format(exception))
         log.error("Output: {}".format(exception.output))
         context["messages"] += makelog
-        context["messages"] += exception.output
+        context["messages"] += "Encountered exception"
+        # context["messages"] += str(exception.output)
+        context["messages"] += str("Exception: {}".format(exception))
         return False
 
 
