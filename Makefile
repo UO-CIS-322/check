@@ -30,11 +30,11 @@ run:	env
 	echo "Launching built-in server for localhost only"
 	($(INVENV) python3 autocheck/flask_grader.py -C autocheck/config.ini)
 
-service:	env
-	echo "Launching green unicorn in background"
-	($(INVENV)  cd autocheck ; \
-                   gunicorn --bind="0.0.0.0:8000" \
-                   flask_grader:app )&
+start:	env
+	bash start.sh
+
+stop:	SERVICE_PID
+	bash stop.sh
 
 ##
 ## Run test suite. 
