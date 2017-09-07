@@ -151,6 +151,7 @@ def testit(context):
     test_script = os.path.join(test_path, "test.sh")
     log.debug("Looking for test script at {}".format(test_path))
     context["messages"] += "\n*** Testing ***\n"
+    testlog = "*** Call to subprocess test.sh did not complete ***"
     try:
         testlog = subprocess.check_output(
             [test_script, clone],
