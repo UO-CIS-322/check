@@ -89,11 +89,33 @@ def upload_project():
     app.logger.debug("Preparing call-out to trial module")
     ok = trial.trial(context)
     app.logger.debug("Returned from trial module")
+    # For the display ... 
     flask.g.messages = context["messages"]
-    if not ok:
-        return flask.render_template("failed.html")
-    return flask.render_template("success.html")
+    flask.g.port = context["port"]
+    # For subsequent steps (after current state is lost)
+    flask.session["clone_path"] = context["clone_path"]
+    flask.session["project"] = context["project"]
+    if ok:
+        flask.g.status = "OK"
+    else:
+        flask.g.status = "Errors"
 
+
+    return flask.render_template("test_output.html")
+
+@app.route("/_kill")
+def _kill():
+    # Here: Kill the job
+    context = { "project": flask.session["project"],
+                "clone_path": flask.session["clone_path"], 
+                "messages": "Attempting shut down"
+              }
+    
+    trial.shutdown(context)
+    flask.flash("Should kill off process using PID in {}"
+                      .format(context["clone_path"]))
+    flask.flash(context["messages"])
+    return flask.redirect(flask.url_for("index"))
 
 ##################
 #

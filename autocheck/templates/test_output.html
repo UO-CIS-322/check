@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>TestMe</title>
+ <!-- 'viewport' is used by bootstrap to respond to device size -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Javascript:  JQuery from a content distribution network (CDN) -->
+  <script
+     src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js">
+  </script>
+
+</head>
+
+<body>
+
+
+{% if g.pid is defined %}
+<h1>Launched</h1>
+    <p>Process {{ g.pid }} listening on port {{ g.port }}</p>
+    <a href="/_kill?pid={{g.pid}}">Kill process</a> {{ g.pid }}!</p>
+{% else %}
+<h1>Ran to completion</h1>
+    <p>No server process to kill</p>
+{% endif %}
+<p> <a href="_kill">Clean up</a></p>
+<h1>Status: {{ g.status }}</h1>
+<h1>Results</h1>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<p>Log: </p>
+<pre>
+{{ g.messages }}
+</pre>
+
+</body> </html>
