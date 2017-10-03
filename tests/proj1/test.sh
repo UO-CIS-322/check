@@ -50,7 +50,7 @@ echo ""
 echo ""
 echo "Accessing illegal path, should be forbidden"
 sleep 1
-curl localhost:${PORT}/~/sample_page.html 2>&1 
+curl localhost:${PORT}'/../sample_page.html' 2>&1 
 echo ""
 echo ""
 echo "Accessing non-existent page, should be 404 error"
